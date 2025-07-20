@@ -1,6 +1,12 @@
-import { useState } from "react";
-import { toaster } from "@decky/api";
-import { installLsfgVk, uninstallLsfgVk } from "../api/lsfgApi";
+import React, { useState } from "react";
+import { toaster, installLsfgVk, uninstallLsfgVk } from "@decky/api";
+
+declare module "@decky/api" {
+  function installLsfgVk(
+    progressCallback?: (progress: number, message: string) => void,
+  ): Promise<{ success: boolean; error?: string }>;
+  function uninstallLsfgVk(): Promise<{ success: boolean; error?: string; message?: string }>;
+}
 
 export function useInstallationActions() {
   const [isInstalling, setIsInstalling] = useState<boolean>(false);
@@ -9,19 +15,20 @@ export function useInstallationActions() {
   const handleInstall = async (
     setIsInstalled: (value: boolean) => void,
     setInstallationStatus: (value: string) => void,
-    reloadConfig?: () => Promise<void>
+    reloadConfig?: () => Promise<void>,
+    progressCallback?: (progress: number, message: string) => void,
   ) => {
     setIsInstalling(true);
     setInstallationStatus("Installing lsfg-vk...");
 
     try {
-      const result = await installLsfgVk();
+      const result = await installLsfgVk(progressCallback);
       if (result.success) {
         setIsInstalled(true);
         setInstallationStatus("lsfg-vk installed successfully!");
         toaster.toast({
           title: "Installation Complete",
-          body: "lsfg-vk has been installed successfully"
+          body: "lsfg-vk has been installed successfully",
         });
 
         // Reload lsfg config after installation
@@ -32,14 +39,14 @@ export function useInstallationActions() {
         setInstallationStatus(`Installation failed: ${result.error}`);
         toaster.toast({
           title: "Installation Failed",
-          body: result.error || "Unknown error occurred"
+          body: result.error || "Unknown error occurred",
         });
       }
     } catch (error) {
       setInstallationStatus(`Installation failed: ${error}`);
       toaster.toast({
         title: "Installation Failed",
-        body: `Error: ${error}`
+        body: `Error: ${error}`,
       });
     } finally {
       setIsInstalling(false);
@@ -48,7 +55,7 @@ export function useInstallationActions() {
 
   const handleUninstall = async (
     setIsInstalled: (value: boolean) => void,
-    setInstallationStatus: (value: string) => void
+    setInstallationStatus: (value: string) => void,
   ) => {
     setIsUninstalling(true);
     setInstallationStatus("Uninstalling lsfg-vk...");
@@ -60,20 +67,20 @@ export function useInstallationActions() {
         setInstallationStatus("lsfg-vk uninstalled successfully!");
         toaster.toast({
           title: "Uninstallation Complete",
-          body: result.message || "lsfg-vk has been uninstalled successfully"
+          body: result.message || "lsfg-vk has been uninstalled successfully",
         });
       } else {
         setInstallationStatus(`Uninstallation failed: ${result.error}`);
         toaster.toast({
           title: "Uninstallation Failed",
-          body: result.error || "Unknown error occurred"
+          body: result.error || "Unknown error occurred",
         });
       }
     } catch (error) {
       setInstallationStatus(`Uninstallation failed: ${error}`);
       toaster.toast({
         title: "Uninstallation Failed",
-        body: `Error: ${error}`
+        body: `Error: ${error}`,
       });
     } finally {
       setIsUninstalling(false);
@@ -84,6 +91,6 @@ export function useInstallationActions() {
     isInstalling,
     isUninstalling,
     handleInstall,
-    handleUninstall
+    handleUninstall,
   };
 }

@@ -1,95 +1,50 @@
-import { PanelSectionRow } from "@decky/ui";
-import { ConfigurationData } from "../config/configSchema";
+import React from 'react';
+import { ConfigurationData } from '../config/configSchema';
 
 interface UsageInstructionsProps {
   config: ConfigurationData;
 }
 
-export function UsageInstructions({ config }: UsageInstructionsProps) {
-  // Build manual environment variables string based on current config
-  const buildManualEnvVars = (): string => {
-    const envVars: string[] = [];
-    
-    if (config.enable_lsfg) {
-      envVars.push("ENABLE_LSFG=1");
-    }
-    
-    // Always include multiplier and flow_scale if LSFG is enabled, as they have defaults
-    if (config.enable_lsfg) {
-      envVars.push(`LSFG_MULTIPLIER=${config.multiplier}`);
-      envVars.push(`LSFG_FLOW_SCALE=${config.flow_scale}`);
-    }
-    
-    if (config.hdr) {
-      envVars.push("LSFG_HDR=1");
-    }
-    
-    if (config.perf_mode) {
-      envVars.push("LSFG_PERF_MODE=1");
-    }
-    
-    if (config.immediate_mode) {
-      envVars.push("MESA_VK_WSI_PRESENT_MODE=immediate");
-    }
-    
-    if (config.disable_vkbasalt) {
-      envVars.push("DISABLE_VKBASALT=1");
-    }
-    
-    if (config.frame_cap > 0) {
-      envVars.push(`DXVK_FRAME_RATE=${config.frame_cap}`);
-    }
-    
-    return envVars.length > 0 ? `${envVars.join(" ")} %command%` : "%command%";
-  };
+export const UsageInstructions: React.FC<UsageInstructionsProps> = ({ config }) => {
+  const instructions = [
+    "1. Install Lossless Scaling from Steam",
+    "2. Install lsfg-vk using the button above",
+    "3. Launch a game",
+    "4. Press Ctrl+Shift+O to open Lossless Scaling",
+    "5. Enable 'Frame Generation' in Lossless Scaling",
+    "6. Set your desired FPS multiplier",
+    "7. Enjoy higher FPS!",
+  ];
+
+  const tips = [
+    "• Make sure your game supports Vulkan",
+    "• Some games may not work with frame generation",
+    "• You can adjust settings in the configuration section above",
+    "• If you experience issues, try disabling HDR mode",
+    "• Performance mode uses a lighter model for better performance",
+  ];
 
   return (
-    <>
-      <PanelSectionRow>
-        <div
-          style={{
-            fontSize: "13px",
-            marginTop: "12px",
-            padding: "8px",
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            borderRadius: "4px"
-          }}
-        >
-          <div style={{ fontWeight: "bold", marginBottom: "6px" }}>
-            Usage Instructions:
+    <div style={{ margin: '12px 0', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+        Usage Instructions
+      </div>
+      <div style={{ marginBottom: '12px' }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Steps:</div>
+        {instructions.map((instruction, index) => (
+          <div key={index} style={{ marginBottom: '2px', fontSize: '12px' }}>
+            {instruction}
           </div>
-          <div style={{ marginBottom: "4px" }}>
-            Option 1: Use the lsfg script (recommended):
+        ))}
+      </div>
+      <div>
+        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Tips:</div>
+        {tips.map((tip, index) => (
+          <div key={index} style={{ marginBottom: '2px', fontSize: '12px', color: '#666' }}>
+            {tip}
           </div>
-          <div
-            style={{
-              fontFamily: "monospace",
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
-              padding: "4px",
-              borderRadius: "2px",
-              fontSize: "12px",
-              marginBottom: "6px"
-            }}
-          >
-            ~/lsfg %command%
-          </div>
-          <div style={{ marginBottom: "4px" }}>
-            Option 2: Manual environment variables:
-          </div>
-          <div
-            style={{
-              fontFamily: "monospace",
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
-              padding: "4px",
-              borderRadius: "2px",
-              fontSize: "12px",
-              marginBottom: "6px"
-            }}
-          >
-            {buildManualEnvVars()}
-          </div>
-        </div>
-      </PanelSectionRow>
-    </>
+        ))}
+      </div>
+    </div>
   );
 }

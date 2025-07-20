@@ -1,5 +1,5 @@
-import { ButtonItem, PanelSectionRow } from "@decky/ui";
-import { FaDownload, FaTrash } from "react-icons/fa";
+import React from 'react';
+// 移除 Decky UI 组件，全部用原生元素
 
 interface InstallationButtonProps {
   isInstalled: boolean;
@@ -9,56 +9,49 @@ interface InstallationButtonProps {
   onUninstall: () => void;
 }
 
-export function InstallationButton({
+export const InstallationButton: React.FC<InstallationButtonProps> = ({
   isInstalled,
   isInstalling,
   isUninstalling,
   onInstall,
-  onUninstall
-}: InstallationButtonProps) {
-  const renderButtonContent = () => {
-    if (isInstalling) {
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div>Installing...</div>
-        </div>
-      );
-    }
-
-    if (isUninstalling) {
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <div>Uninstalling...</div>
-        </div>
-      );
-    }
-
+  onUninstall,
+}) => {
+  const handleClick = () => {
     if (isInstalled) {
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <FaTrash />
-          <div>Uninstall lsfg-vk</div>
-        </div>
-      );
+      onUninstall();
+    } else {
+      onInstall();
     }
-
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <FaDownload />
-        <div>Install lsfg-vk</div>
-      </div>
-    );
   };
 
+  const getButtonText = () => {
+    if (isInstalling) return 'Installing...';
+    if (isUninstalling) return 'Uninstalling...';
+    return isInstalled ? 'Uninstall lsfg-vk' : 'Install lsfg-vk';
+  };
+
+  const isDisabled = isInstalling || isUninstalling;
+
   return (
-    <PanelSectionRow>
-      <ButtonItem
-        layout="below"
-        onClick={isInstalled ? onUninstall : onInstall}
-        disabled={isInstalling || isUninstalling}
+    <div style={{ margin: '12px 0', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+        Installation
+      </div>
+      <button
+        onClick={handleClick}
+        disabled={isDisabled}
+        style={{
+          padding: '8px 16px',
+          borderRadius: '4px',
+          background: isInstalled ? '#f44336' : '#4CAF50',
+          color: '#fff',
+          border: 'none',
+          cursor: isDisabled ? 'not-allowed' : 'pointer',
+          opacity: isDisabled ? 0.6 : 1,
+        }}
       >
-        {renderButtonContent()}
-      </ButtonItem>
-    </PanelSectionRow>
+        {getButtonText()}
+      </button>
+    </div>
   );
-}
+};

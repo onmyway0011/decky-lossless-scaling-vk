@@ -1,4 +1,4 @@
-import { PanelSectionRow } from "@decky/ui";
+import React from 'react';
 
 interface StatusDisplayProps {
   dllDetected: boolean;
@@ -7,45 +7,29 @@ interface StatusDisplayProps {
   installationStatus: string;
 }
 
-export function StatusDisplay({
+export const StatusDisplay: React.FC<StatusDisplayProps> = ({
   dllDetected,
   dllDetectionStatus,
   isInstalled,
-  installationStatus
-}: StatusDisplayProps) {
+  installationStatus,
+}) => {
   return (
-    <PanelSectionRow>
-      <div style={{ marginBottom: "8px", fontSize: "14px" }}>
-        <div
-          style={{
-            color: dllDetected ? "#4CAF50" : "#F44336",
-            fontWeight: "600",
-            marginBottom: "6px",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px"
-          }}
-        >
-          <span style={{ fontSize: "16px" }}>
-            {dllDetected ? "✅" : "❌"}
-          </span>
-          {dllDetectionStatus}
-        </div>
-        <div
-          style={{
-            color: isInstalled ? "#4CAF50" : "#FF9800",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px"
-          }}
-        >
-          <span style={{ fontSize: "16px" }}>
-            {isInstalled ? "✅" : "❌"}
-          </span>
-          {installationStatus}
-        </div>
+    <div style={{ margin: '12px 0', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+      <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+        Status
       </div>
-    </PanelSectionRow>
+      <div style={{ marginBottom: '4px' }}>
+        <span style={{ fontWeight: 'bold' }}>Installation: </span>
+        <span style={{ color: isInstalled ? '#4CAF50' : '#f44336' }}>
+          {installationStatus}
+        </span>
+      </div>
+      <div>
+        <span style={{ fontWeight: 'bold' }}>DLL Detection: </span>
+        <span style={{ color: dllDetected ? '#4CAF50' : '#f44336' }}>
+          {dllDetectionStatus}
+        </span>
+      </div>
+    </div>
   );
 }

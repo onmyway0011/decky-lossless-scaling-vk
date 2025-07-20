@@ -7,6 +7,8 @@ import shutil
 import zipfile
 import tempfile
 from pathlib import Path
+from datetime import datetime
+import os
 from typing import Dict, Any
 
 from .base_service import BaseService
@@ -19,14 +21,49 @@ from .types import InstallationResponse, UninstallationResponse, InstallationChe
 
 
 class InstallationService(BaseService):
+    def generate_install_package(self, output_dir: str) -> str:
+        """生成Steam Deck安装包"""
+        try:
+            plugin_dir = Path(__file__).parent.parent.parent
+            dist_path = plugin_dir / 'dist'
+            timestamp = datetime.now().strftime("%Y%m%d%H%M")
+            zip_path = Path(output_dir) / f'decky-ls-{timestamp}.zip'
+
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for root, _, files in os.walk(dist_path):
+                    for file in files:
+                        file_path = Path(root) / file
+                        arcname = file_path.relative_to(dist_path)
+                        zipf.write(file_path, arcname)
+
+            return str(zip_path)
+        except Exception as e:
+            self.log.error(f'Package generation failed: {str(e)}')
+            raise
     """Service for handling lsfg-vk installation and uninstallation"""
     
-    def __init__(self, logger=None):
+    def __init__(self, logger=None) -> None:
         super().__init__(logger)
         
         # File paths using constants
         self.lib_file = self.local_lib_dir / LIB_FILENAME
         self.json_file = self.local_share_dir / JSON_FILENAME
+        self._progress_callbacks = []
+        
+    def add_progress_callback(self, callback: callable) -> None:
+        """
+        添加进度回调函数
+        :param callback: 回调函数，接收(progress: float, message: str)参数
+        """
+        self._progress_callbacks.append(callback)
+        
+    def _notify_progress(self, progress: float, message: str):
+        """通知所有注册的回调函数进度更新"""
+        for callback in self._progress_callbacks:
+            try:
+                callback(progress, message)
+            except Exception as e:
+                self.log.warning(f"Progress callback failed: {str(e)}")
     
     def install(self) -> InstallationResponse:
         """Install lsfg-vk by extracting the zip file to ~/.local
@@ -35,6 +72,8 @@ class InstallationService(BaseService):
             InstallationResponse with success status and message/error
         """
         try:
+            self._notify_progress(0, "开始安装...")
+            
             # Get the path to the zip file - need to go up to plugin root from py_modules/lsfg_vk/
             plugin_dir = Path(__file__).parent.parent.parent
             zip_path = plugin_dir / BIN_DIR / ZIP_FILENAME
@@ -45,8 +84,11 @@ class InstallationService(BaseService):
                 self.log.error(error_msg)
                 return {"success": False, "error": error_msg, "message": ""}
             
+            self._notify_progress(10, "创建目录结构...")
             # Create directories if they don't exist
             self._ensure_directories()
+            
+            self._notify_progress(20, "下载组件...")
             
             # Extract and install files
             self._extract_and_install_files(zip_path)
@@ -77,6 +119,7 @@ class InstallationService(BaseService):
             zipfile.BadZipFile: If zip file is corrupted
             OSError: If file operations fail
         """
+        self._notify_progress(30, "解压文件...")
         # Destination mapping for file types
         dest_map = {
             SO_EXT: self.local_lib_dir,
@@ -84,11 +127,17 @@ class InstallationService(BaseService):
         }
         
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            total_files = len(zip_ref.infolist())
             with tempfile.TemporaryDirectory() as temp_dir:
                 temp_path = Path(temp_dir)
-                zip_ref.extractall(temp_path)
+                
+                for i, file_info in enumerate(zip_ref.infolist()):
+                    zip_ref.extract(file_info, temp_path)
+                    progress = 30 + int((i / total_files) * 50)
+                    self._notify_progress(progress, f"正在解压 {file_info.filename}...")
                 
                 # Process extracted files
+                self._notify_progress(80, "移动文件到正确位置...")
                 for root, dirs, files in os.walk(temp_path):
                     root_path = Path(root)
                     for file in files:
@@ -101,6 +150,8 @@ class InstallationService(BaseService):
                             dst_file = dst_dir / file
                             shutil.copy2(src_file, dst_file)
                             self.log.info(f"Copied {file} to {dst_file}")
+        
+        self._notify_progress(100, "安装完成!")
     
     def _create_lsfg_script(self) -> None:
         """Create the lsfg script in home directory with default configuration"""

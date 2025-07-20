@@ -1,23 +1,12 @@
-import { staticClasses } from "@decky/ui";
+// 移除 Decky UI 组件和图标，全部用原生元素
 import { definePlugin } from "@decky/api";
-import { GiPlasticDuck } from "react-icons/gi";
-import { Content } from "./components";
+import { Content } from "./components/Content";
 
 export default definePlugin(() => {
-  console.log("Lossless Scaling plugin initializing");
-
   return {
-    // The name shown in various decky menus
-    name: "Lossless Scaling",
-    // The element displayed at the top of your plugin's menu
-    titleView: <div className={staticClasses.Title}>Lossless Scaling</div>,
-    // The content of your plugin's menu
+    name: "Lossless Scaling VK",
+    title: <div>Lossless Scaling VK</div>,
     content: <Content />,
-    // The icon displayed in the plugin list
-    icon: <GiPlasticDuck />,
-    // The function triggered when your plugin unloads
-    onDismount() {
-      console.log("Lossless Scaling unloading");
-    }
+    icon: <span>��</span>,
   };
 });

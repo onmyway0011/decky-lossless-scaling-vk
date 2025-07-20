@@ -4,9 +4,12 @@
   "description": "Use Lossless Scaling on the Steam Deck using the lsfg-vk vulkan layer",
   "type": "module",
   "scripts": {
+    "dev": "rollup -c -w",
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:ci": "jest --coverage --reporters=default --reporters=jest-html-reporters",
+    "test:watch": "jest --watchAll"
   },
   "repository": {
     "type": "git",
@@ -26,11 +29,21 @@
   },
   "homepage": "https://github.com/xXJSONDeruloXx/decky-lossless-scaling-vk#readme",
   "devDependencies": {
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@decky/rollup": "^1.0.1",
-    "@decky/ui": "^4.7.2",
-    "@types/react": "18.3.3",
+    "@decky/ui": "^4.10.4",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/react": "18.2.0",
     "@types/react-dom": "18.3.0",
     "@types/webpack": "^5.28.5",
+    "babel-jest": "^30.0.4",
+    "jest": "^30.0.4",
+    "jest-html-reporters": "^3.1.7",
     "rollup": "^4.22.5",
     "typescript": "^5.6.2"
   },
@@ -39,7 +52,7 @@
     "react-icons": "^5.3.0",
     "tslib": "^2.7.0"
   },
-  "remote_binary_bundling" : true,
+  "remote_binary_bundling": true,
   "remote_binary": [
     {
       "name": "lsfg-vk_archlinux.zip",

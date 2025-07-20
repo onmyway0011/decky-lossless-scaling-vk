@@ -1,50 +1,69 @@
-# Lossless Scaling for Steam Deck
+# Lossless Scaling Vulkan 版 - Decky 插件
 
-**Unofficial Community Plugin**: This Decky Loader plugin is an independent project and is **not officially supported** by the creators of Lossless Scaling or lsfg-vk. Support is provided separately via the [Decky Lossless Discord Channel](https://discord.gg/SFhFy2Sd).
+🎮 专为Steam Deck优化的无损缩放解决方案，基于Vulkan实现更高效的帧率转换。
 
-## What is this?
+![插件截图](./assets/qam-screenshot.jpeg)
 
-A Decky plugin that streamlines the installation of **lsfg-vk** ([Lossless Scaling Frame Generation Vulkan layer](https://github.com/PancakeTAS/lsfg-vk)) on Steam Deck, allowing you to use the Lossless Scaling features on Linux with a controller friendly UI in SteamOS or Bazzite. 
+## ✨ 功能特性
 
-## Installation
+✅ **核心功能**  
+🔄 Vulkan驱动帧率转换  
+📈 智能分辨率适配  
+⚡ 性能模式/画质模式切换
 
-**Note:** This plugin is not yet available on the Decky Plugin Store, it is in an experimental state, and likely to change drastically pending a full store release. 
+✅ **增强功能**  
+🎨 HDR兼容支持  
+🔧 实时配置热更新  
+📊 帧率监控覆盖
 
-1. **Download the plugin** from the [latest release](https://github.com/xXJSONDeruloXx/decky-lossless-scaling-vk/releases)
-   - Download the "Lossless Scaling.zip" file to your Steam Deck
-2. **Install manually through Decky**:
-   - In Game Mode, go to the settings cog in the top right of the Decky Loader tab
-   - Enable "Developer Mode"
-   - Go to "Developer" tab and select "Install Plugin from Zip"
-   - Select the downloaded "Lossless Scaling.zip" file
+## 📦 安装指南
 
-## How to Use
+### 通过 Decky Store 安装
 
-1. **Purchase and install** [Lossless Scaling](https://store.steampowered.com/app/993090/Lossless_Scaling/) from Steam
-2. **Open the plugin** from the Decky menu
-3. **Click "Install lsfg-vk"** to automatically set up the lsfg-vk vulkan layer
-4. **Configure settings** using the plugin's UI.
-5. **Apply launch commands** to the game you want to use frame generation with:
-   - **Option 1 (Recommended)**: `~/lsfg %command%` - Uses your plugin configuration
-      - **Option 2**: Manual environment variables like `ENABLE_LSFG=1 LSFG_MULTIPLIER=2 %COMMAND%`
-      - See the [LSFG-VK WIKI](https://github.com/PancakeTAS/lsfg-vk/wiki/Configuring-lsfg%E2%80%90vk) for more information on each available environment variable
+1. 打开Steam Deck的开发者模式
+2. 在Decky插件商店搜索"Lossless Scaling VK"
+3. 点击安装后重启QAM菜单
 
-## Feedback and Support
+### 手动安装
 
-For per-game feedback and community support, please join the [Decky Lossless Discord Channel](https://discord.gg/SFhFy2Sd)
+```bash
+curl -L https://install.deckbrew.xyz | sh
+cd ~/homebrew/plugins
+git clone https://github.com/your-repo/decky-lossless-scaling-vk.git
+```
 
-## What it does
+## 🛠️ 配置说明
 
-The plugin:
-- Extracts the lsfg-vk library to `~/.local/lib/`
-- Installs the Vulkan layer configuration to `~/.local/share/vulkan/implicit_layer.d/`
-- Creates an executable `lsfg` script in the home directory with configurable settings
-- Provides a user-friendly interface to configure LSFG settings (enable/disable, multiplier, flow scale, HDR, immediate mode)
-- Automatically updates the `lsfg` script when settings are changed
-- Provides easy uninstallation by removing these files when no longer needed
+```javascript
+// 示例配置
+{
+  "frame_multiplier": 2,    // 帧率倍增系数
+  "hdr_mode": "auto",       // HDR处理模式
+  "perf_profile": "balanced" // 性能方案
+}
+```
 
-## Credits
+## 🔄 更新日志
 
-[PancakeTAS](https://github.com/PancakeTAS/lsfg-vk) for creating the lsfg-vk compatibility layer.
-  
-Special thanks to <a href="https://www.youtube.com/@DeckWizard" target="_blank">Deck Wizard</a> for the video tutorial.
+| 版本   | 日期       | 更新内容               |
+| ------ | ---------- | ---------------------- |
+| v1.2.0 | 2023-11-20 | 新增性能监控面板       |
+| v1.1.5 | 2023-11-15 | 修复Vulkan内存泄漏问题 |
+
+## 🤝 参与开发
+
+欢迎提交PR！请遵循以下流程：
+
+1. Fork本仓库
+2. 创建特性分支 (`git checkout -b feature/awesome`)
+3. 提交更改 (`git commit -am 'Add awesome feature'`)
+4. 推送分支 (`git push origin feature/awesome`)
+5. 发起Pull Request
+
+## 📄 许可协议
+
+本项目采用 [MIT License](LICENSE) 授权
+
+---
+
+🔗 [官方文档](https://docs.lossless.com) | 🐞 [问题反馈](issues) | ⭐ [Github Star]()

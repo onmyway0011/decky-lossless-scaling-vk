@@ -28,12 +28,19 @@ class Plugin:
     methods (_main, _unload, _uninstall, _migration).
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the plugin with all necessary services"""
         # Initialize services - they will use decky.logger by default
         self.installation_service = InstallationService()
         self.dll_detection_service = DllDetectionService()
         self.configuration_service = ConfigurationService()
+        
+        # 抽象层接口
+        self._interfaces = {
+            'installation': self.installation_service,
+            'dll_detection': self.dll_detection_service,
+            'configuration': self.configuration_service
+        }
 
     # Installation methods
     async def install_lsfg_vk(self) -> Dict[str, Any]:
@@ -170,6 +177,14 @@ class Plugin:
                 # Compare versions
                 update_available = self._compare_versions(current_version, latest_version)
                 
+                # Verify update signature if update is available
+                if update_available and not await self._verify_update_signature(latest_version):
+                    return {
+                        "success": False,
+                        "error": "Update signature verification failed",
+                        "update_available": False
+                    }
+                
                 return {
                     "success": True,
                     "update_available": update_available,
@@ -192,6 +207,15 @@ class Plugin:
                 "success": False,
                 "error": f"Update check failed: {str(e)}"
             }
+            
+    async def _verify_update_signature(self, version: str) -> bool:
+        """
+        验证更新包的签名
+        :param version: 要验证的版本号
+        :return: 验证是否通过
+        """
+        # TODO: 实现实际的签名验证逻辑
+        return True  # 临时返回True，待实现
 
     async def download_plugin_update(self, download_url: str) -> Dict[str, Any]:
         """Download the plugin update zip file to ~/Downloads
@@ -306,7 +330,7 @@ class Plugin:
             return False
 
     # Plugin lifecycle methods
-    async def _main(self):
+    async def _main(self) -> None:
         """
         Asyncio-compatible long-running code, executed in a task when the plugin is loaded.
         
@@ -316,7 +340,7 @@ class Plugin:
         import decky
         decky.logger.info("Lossless Scaling VK plugin loaded!")
 
-    async def _unload(self):
+    async def _unload(self) -> None:
         """
         Function called first during the unload process.
         
@@ -326,7 +350,7 @@ class Plugin:
         import decky
         decky.logger.info("Lossless Scaling VK plugin unloading")
 
-    async def _uninstall(self):
+    async def _uninstall(self) -> None:
         """
         Function called after `_unload` during uninstall.
         
@@ -341,7 +365,7 @@ class Plugin:
         
         decky.logger.info("Lossless Scaling VK plugin uninstall cleanup completed")
 
-    async def _migration(self):
+    async def _migration(self) -> None:
         """
         Migrations that should be performed before entering `_main()`.
         

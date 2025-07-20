@@ -11,6 +11,7 @@ This module defines the complete configuration structure, including:
 from typing import TypedDict, Dict, Any, Union, Callable, cast
 from dataclasses import dataclass, field
 from enum import Enum
+from pydantic import BaseModel
 
 
 class ConfigFieldType(Enum):
@@ -18,6 +19,32 @@ class ConfigFieldType(Enum):
     BOOLEAN = "boolean"
     INTEGER = "integer"
     FLOAT = "float"
+
+
+@dataclass
+class ConfigField:
+    """Configuration field definition"""
+    name: str
+    field_type: ConfigFieldType
+    default: Union[bool, int, float]
+    description: str
+    script_template: str  # Template for script generation
+    script_comment: str = ""  # Comment to add when disabled
+    
+    def get_script_line(self, value: Union[bool, int, float]) -> str:
+        """Generate script line for this field"""
+        if self.field_type == ConfigFieldType.BOOLEAN:
+            if value:
+                return self.script_template.format(value=1)
+            else:
+                return f"# {self.script_template.format(value=1)}"
+        else:
+            return self.script_template.format(value=value)
+
+
+class ConfigSchema(BaseModel):
+  scaling_factor: confloat(gt=0, le=5)
+  enable_ai: bool
 
 
 @dataclass

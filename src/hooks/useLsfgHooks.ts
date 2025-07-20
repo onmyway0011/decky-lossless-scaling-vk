@@ -5,9 +5,12 @@ import {
   checkLosslessScalingDll,
   getLsfgConfig,
   updateLsfgConfigFromObject,
-  type ConfigUpdateResult
+  type ConfigUpdateResult,
 } from "../api/lsfgApi";
-import { ConfigurationData, ConfigurationManager } from "../config/configSchema";
+import {
+  ConfigurationData,
+  ConfigurationManager,
+} from "../config/configSchema";
 
 export function useInstallationStatus() {
   const [isInstalled, setIsInstalled] = useState<boolean>(false);
@@ -38,7 +41,7 @@ export function useInstallationStatus() {
     installationStatus,
     setIsInstalled,
     setInstallationStatus,
-    checkInstallation
+    checkInstallation,
   };
 }
 
@@ -66,13 +69,15 @@ export function useDllDetection() {
 
   return {
     dllDetected,
-    dllDetectionStatus
+    dllDetectionStatus,
   };
 }
 
 export function useLsfgConfig() {
   // Use centralized configuration for initial state
-  const [config, setConfig] = useState<ConfigurationData>(() => ConfigurationManager.getDefaults());
+  const [config, setConfig] = useState<ConfigurationData>(() =>
+    ConfigurationManager.getDefaults(),
+  );
 
   const loadLsfgConfig = useCallback(async () => {
     try {
@@ -89,31 +94,40 @@ export function useLsfgConfig() {
     }
   }, []);
 
-  const updateConfig = useCallback(async (newConfig: ConfigurationData): Promise<ConfigUpdateResult> => {
-    try {
-      const result = await updateLsfgConfigFromObject(newConfig);
-      if (result.success) {
-        setConfig(newConfig);
-      } else {
+  const updateConfig = useCallback(
+    async (newConfig: ConfigurationData): Promise<ConfigUpdateResult> => {
+      try {
+        const result = await updateLsfgConfigFromObject(newConfig);
+        if (result.success) {
+          setConfig(newConfig);
+        } else {
+          toaster.toast({
+            title: "Update Failed",
+            body: result.error || "Failed to update configuration",
+          });
+        }
+        return result;
+      } catch (error) {
         toaster.toast({
           title: "Update Failed",
-          body: result.error || "Failed to update configuration"
+          body: `Error: ${error}`,
         });
+        return { success: false, error: String(error) };
       }
-      return result;
-    } catch (error) {
-      toaster.toast({
-        title: "Update Failed",
-        body: `Error: ${error}`
-      });
-      return { success: false, error: String(error) };
-    }
-  }, []);
+    },
+    [],
+  );
 
-  const updateField = useCallback(async (fieldName: keyof ConfigurationData, value: boolean | number): Promise<ConfigUpdateResult> => {
-    const newConfig = { ...config, [fieldName]: value };
-    return updateConfig(newConfig);
-  }, [config, updateConfig]);
+  const updateField = useCallback(
+    async (
+      fieldName: keyof ConfigurationData,
+      value: boolean | number,
+    ): Promise<ConfigUpdateResult> => {
+      const newConfig = { ...config, [fieldName]: value };
+      return updateConfig(newConfig);
+    },
+    [config, updateConfig],
+  );
 
   useEffect(() => {
     loadLsfgConfig();
@@ -124,6 +138,6 @@ export function useLsfgConfig() {
     setConfig,
     loadLsfgConfig,
     updateConfig,
-    updateField
+    updateField,
   };
 }

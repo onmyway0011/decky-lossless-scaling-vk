@@ -14,6 +14,19 @@ from .types import ConfigurationResponse
 class ConfigurationService(BaseService):
     """Service for managing lsfg script configuration"""
     
+    def __init__(self) -> None:
+        super().__init__()
+        self.config_version = 1  # 当前配置版本号
+        
+    def migrate_config(self, config_data: dict) -> dict:
+        """
+        配置版本迁移方法
+        :param config_data: 原始配置数据
+        :return: 迁移后的配置数据
+        """
+        # 未来版本迁移逻辑可以在这里实现
+        return config_data
+    
     def get_config(self) -> ConfigurationResponse:
         """Read current lsfg script configuration
         
@@ -112,39 +125,26 @@ class ConfigurationService(BaseService):
         
         return config
     
-    def update_config(self, enable_lsfg: bool, multiplier: int, flow_scale: float, 
-                     hdr: bool, perf_mode: bool, immediate_mode: bool, disable_vkbasalt: bool, frame_cap: int) -> ConfigurationResponse:
+    def update_config(self, config_data: dict) -> ConfigurationResponse:
         """Update lsfg script configuration
         
         Args:
-            enable_lsfg: Whether to enable LSFG
-            multiplier: LSFG multiplier value
-            flow_scale: LSFG flow scale value
-            hdr: Whether to enable HDR
-            perf_mode: Whether to enable performance mode
-            immediate_mode: Whether to enable immediate present mode (disable vsync)
-            disable_vkbasalt: Whether to disable vkbasalt layer
-            frame_cap: Frame rate cap value (0-60, 0 = disabled)
+            config_data: Configuration data dictionary
             
         Returns:
             ConfigurationResponse with success status
         """
         try:
-            # Create configuration from individual arguments
-            config = ConfigurationManager.create_config_from_args(
-                enable_lsfg, multiplier, flow_scale, hdr, perf_mode, immediate_mode, disable_vkbasalt, frame_cap
-            )
+            # 先迁移配置版本
+            migrated_data = self.migrate_config(config_data)
             
             # Generate script content using centralized manager
-            script_content = ConfigurationManager.generate_script_content(config)
+            script_content = ConfigurationManager.generate_script_content(migrated_data)
             
             # Write the updated script atomically
             self._atomic_write(self.lsfg_script_path, script_content, 0o755)
             
-            self.log.info(f"Updated lsfg script configuration: enable_lsfg={enable_lsfg}, "
-                         f"multiplier={multiplier}, flow_scale={flow_scale}, hdr={hdr}, "
-                         f"perf_mode={perf_mode}, immediate_mode={immediate_mode}, "
-                         f"disable_vkbasalt={disable_vkbasalt}, frame_cap={frame_cap}")
+            self.log.info(f"Updated lsfg script configuration: {migrated_data}")
             
             return {
                 "success": True,
@@ -171,3 +171,17 @@ class ConfigurationService(BaseService):
                 "message": None,
                 "error": str(e)
             }
+            
+    def batch_update(self, updates: dict) -> ConfigurationResponse:
+        """
+        批量更新配置项
+        :param updates: 要更新的配置项字典 {field_name: value}
+        :return: ConfigurationResponse with success status
+        """
+        current_config = self.get_config()
+        if not current_config["success"]:
+            return current_config
+            
+        updated_config = current_config["config"]
+        updated_config.update(updates)
+        return self.update_config(updated_config)
